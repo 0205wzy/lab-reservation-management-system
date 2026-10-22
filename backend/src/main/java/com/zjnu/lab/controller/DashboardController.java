@@ -1,0 +1,3 @@
+package com.zjnu.lab.controller;
+import com.zjnu.lab.common.*;import com.zjnu.lab.mapper.DashboardMapper;import com.zjnu.lab.service.LabScopeService;import lombok.RequiredArgsConstructor;import org.springframework.web.bind.annotation.*;import java.util.*;
+@RestController @RequiredArgsConstructor public class DashboardController {private final DashboardMapper mapper;private final LabScopeService scope;@GetMapping("/dashboard")public ApiResponse<?> data(){List<Long> labIds=scope.scope();return ApiResponse.ok(Map.of("summary",mapper.summary(labIds),"reservationStatus",mapper.reservationStatus(labIds),"deviceStatus",mapper.deviceStatus(labIds)));}}

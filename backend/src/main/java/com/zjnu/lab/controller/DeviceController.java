@@ -1,0 +1,7 @@
+package com.zjnu.lab.controller;
+import com.zjnu.lab.common.*; import com.zjnu.lab.mapper.*; import com.zjnu.lab.model.Device; import com.zjnu.lab.service.LabScopeService; import lombok.RequiredArgsConstructor; import org.springframework.web.bind.annotation.*;
+@RestController @RequiredArgsConstructor public class DeviceController {private final DeviceMapper mapper; private final RepairMapper repairs; private final LabMapper labs; private final LabScopeService scope;
+ @GetMapping("/devices") public ApiResponse<?> list(@RequestParam(required=false)String keyword,@RequestParam(required=false)String status,@RequestParam(required=false)Long labId){return ApiResponse.ok(mapper.list(keyword,status,labId,scope.scope()));}
+ @PostMapping("/manage/devices") public ApiResponse<?> add(@RequestBody Device d){scope.requireAccess(labs.get(d.getLabId()));if(d.getStatus()==null)d.setStatus("NORMAL");mapper.insert(d);return ApiResponse.ok(d);}
+ @PutMapping("/manage/devices/{id}") public ApiResponse<?> update(@PathVariable Long id,@RequestBody Device d){Device current=mapper.get(id);if(current==null)throw new BusinessException("设备不存在");scope.requireAccess(current.getLabId());scope.requireAccess(labs.get(d.getLabId()));String activeRepairStatus=repairs.activeStatus(id);if(activeRepairStatus!=null)d.setStatus("PROCESSING".equals(activeRepairStatus)?"MAINTENANCE":"FAULT");d.setId(id);mapper.update(d);return ApiResponse.ok(d);}
+}
